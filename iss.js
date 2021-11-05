@@ -44,20 +44,41 @@ const fetchCoordsByIP = function(ip, callback) {
   // error can be set if invalid domain, user is offline, etc.
   request(`https://freegeoip.app/json/${ip}`, (error, response, body) => {
     const { latitude, longitude } = JSON.parse(body);
-  
+  //fatch error
   if (error) {
       callback(error, null);
       return;
     }
-
+    // !200 then give error
     if (response.statusCode !== 200) {
       callback(Error(`Status Code ${response.statusCode} when fetching Coordinates for IP: ${body}`), null);
       return;
     }
-
+    //give callback send latitude and longitude
     
     callback(null, { latitude, longitude });
   });
 }; 
 // if we get here, all's well and we got the data
-module.exports = { fetchMyIP ,fetchCoordsByIP};
+
+const fetchISSFlyOverTimes = function(coords, callback) {
+    const url = `https://iss-pass.herokuapp.com/json/?lat=${coords.latitude}&lon=${coords.longitude}`;
+  
+    request(url, (error, response, body) => {
+     //error fatch 
+      if (error) {
+        callback(error, null);
+        return;
+      }
+      //! 200 error fatch
+      if (response.statusCode !== 200) {
+        callback(Error(`Status Code ${response.statusCode} when fetching ISS pass times: ${body}`), null);
+        return;
+      }
+      //passes seprate to body
+      const passes = JSON.parse(body).response;
+      // callback passes
+      callback(null, passes);
+    });
+  };
+  module.exports = { fetchMyIP ,fetchCoordsByIP , fetchISSFlyOverTimes};
